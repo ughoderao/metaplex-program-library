@@ -18,6 +18,7 @@ solana-program = "1.8.5"
 spl-token = { version="=3.2.0", features = [ "no-entrypoint" ] }
 thiserror = "1.0"
 borsh = "0.9.1"
+shank = { path = "../../../shank/shank" }
 
 [lib]
 crate-type = ["cdylib", "lib"]
