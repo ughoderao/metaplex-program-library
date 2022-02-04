@@ -2125,6 +2125,7 @@ dependencies = [
  "borsh 0.9.2",
  "num-derive",
  "num-traits",
+ "shank",
  "solana-program",
  "spl-token",
  "thiserror",
@@ -3016,6 +3017,34 @@ dependencies = [
  "digest 0.9.0",
  "keccak",
  "opaque-debug",
+]
+
+[[package]]
+name = "shank"
+version = "0.0.0"
+dependencies = [
+ "shank_macro",
+]
+
+[[package]]
+name = "shank_macro"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2 1.0.36",
+ "quote 1.0.15",
+ "shank_macro_impl",
+ "syn 1.0.86",
+]
+
+[[package]]
+name = "shank_macro_impl"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "proc-macro2 1.0.36",
+ "quote 1.0.15",
+ "serde",
+ "syn 1.0.86",
 ]
 
 [[package]]
