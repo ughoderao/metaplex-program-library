@@ -13,6 +13,8 @@
     "build:docs": "typedoc",
     "build": "rimraf dist && tsc -p tsconfig.json",
     "api:gen": "node scripts/api-gen-ts.js && prettier --write ./src/**/*.ts",
+    "amman:start": "DEBUG='amman*' amman validator",
+    "amman:stop": "pkill solana-test-validator",
     "test": "echo mpl-token-vault tests coming up ...",
     "lint": "eslint \"{src,test}/**/*.ts\" --format stylish",
     "fix:lint": "yarn lint --fix",
@@ -38,12 +40,16 @@
   "author": "Metaplex Maintainers <contact@metaplex.com>",
   "license": "MIT",
   "dependencies": {
+    "@metaplex-foundation/beet": "^0.0.7",
+    "@metaplex-foundation/beet-solana": "^0.0.6",
     "@metaplex-foundation/mpl-core": "^0.0.2",
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.31.0"
   },
   "devDependencies": {
+    "@metaplex-foundation/amman": "^0.0.9",
     "@metaplex-foundation/solita": "^0.0.3",
+    "bn.js": "^5.2.0",
     "eslint": "^8.3.0",
     "rimraf": "^3.0.2",
     "typedoc": "^0.22.11"
