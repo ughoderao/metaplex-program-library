@@ -8,19 +8,19 @@ use solana_program::{
 };
 
 #[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, Clone)]
+#[derive(Debug, BorshSerialize, BorshDeserialize, Clone)]
 pub struct InitVaultArgs {
     pub allow_further_share_creation: bool,
 }
 
 #[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, Clone)]
+#[derive(Debug, BorshSerialize, BorshDeserialize, Clone)]
 pub struct AmountArgs {
     pub amount: u64,
 }
 
 #[repr(C)]
-#[derive(BorshSerialize, BorshDeserialize, Clone)]
+#[derive(Debug, BorshSerialize, BorshDeserialize, Clone)]
 pub struct NumberOfShareArgs {
     pub number_of_shares: u64,
 }
@@ -32,7 +32,7 @@ pub struct MintEditionProxyArgs {
 }
 
 /// Instructions supported by the Fraction program.
-#[derive(BorshSerialize, BorshDeserialize, Clone, ShankInstruction)]
+#[derive(Debug, BorshSerialize, BorshDeserialize, Clone, ShankInstruction)]
 #[rustfmt::skip]
 pub enum VaultInstruction {
     /// Initialize a token vault, starts inactivate. Add tokens in subsequent instructions, then activate.

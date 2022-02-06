@@ -7,7 +7,7 @@ use solana_program::{account_info::AccountInfo, program_error::ProgramError, pub
 pub const PREFIX: &str = "vault";
 
 #[repr(C)]
-#[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize, PartialEq)]
 pub enum Key {
     Uninitialized,
     SafetyDepositBoxV1,
@@ -106,7 +106,7 @@ impl SafetyDepositBox {
 }
 
 #[repr(C)]
-#[derive(Clone, BorshSerialize, BorshDeserialize, ShankAccount)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize, ShankAccount)]
 pub struct ExternalPriceAccount {
     pub key: Key,
     pub price_per_share: u64,
