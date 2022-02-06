@@ -16,7 +16,8 @@ pub enum Key {
 }
 
 pub const MAX_SAFETY_DEPOSIT_SIZE: usize = 1 + 32 + 32 + 32 + 1;
-pub const MAX_VAULT_SIZE: usize = 1 + 32 + 32 + 32 + 32 + 1 + 32 + 1 + 32 + 1 + 1 + 8;
+// TODO(thlorenz): NEEDS REVIEW (removed superfluous byte)
+pub const MAX_VAULT_SIZE: usize = 1 + 32 + 32 + 32 + 32 + 32 + 1 + 32 + 1 + 1 + 8;
 pub const MAX_EXTERNAL_ACCOUNT_SIZE: usize = 1 + 8 + 32 + 1;
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
