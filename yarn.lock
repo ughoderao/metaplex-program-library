@@ -1232,6 +1232,7 @@ __metadata:
     bn.js: ^5.2.0
     eslint: ^8.3.0
     rimraf: ^3.0.2
+    spok: ^1.4.3
     typedoc: ^0.22.11
   languageName: unknown
   linkType: soft
