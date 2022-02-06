@@ -1030,6 +1030,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metaplex-foundation/beet@npm:^0.0.8":
+  version: 0.0.8
+  resolution: "@metaplex-foundation/beet@npm:0.0.8"
+  dependencies:
+    ansicolors: ^0.3.2
+    bn.js: ^5.2.0
+    debug: ^4.3.3
+  checksum: 0dc0816abed44248e9df2988974710049e915775fbced52b8b4ce431e76b98db703233d567af528d894a07b0ff42776bf3cb79ef056f4a40d922a5661b406352
+  languageName: node
+  linkType: hard
+
 "@metaplex-foundation/metaplex-program-library@workspace:.":
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/metaplex-program-library@workspace:."
@@ -1223,7 +1234,7 @@ __metadata:
   resolution: "@metaplex-foundation/mpl-token-vault@workspace:token-vault/js"
   dependencies:
     "@metaplex-foundation/amman": ^0.0.9
-    "@metaplex-foundation/beet": ^0.0.7
+    "@metaplex-foundation/beet": ^0.0.8
     "@metaplex-foundation/beet-solana": ^0.0.6
     "@metaplex-foundation/mpl-core": ^0.0.2
     "@metaplex-foundation/solita": ^0.0.4
