@@ -8,11 +8,7 @@ import {
 } from '@solana/web3.js';
 import { createMint, createTokenAccount } from '../common/helpers';
 import { createInitVaultInstruction, InitVaultInstructionAccounts, Vault } from '../generated';
-
-// TODO(thlorenz): shank Parse out of Rust
-const VAULT_PREFIX = 'vault';
-// TODO(thlorenz): we already have that just need to expose it somewhere
-const VAULT_PROGRAM_ID = 'vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJtmZ58rPsn';
+import { VAULT_PREFIX, VAULT_PROGRAM_ID } from '../mpl-token-vault';
 
 export async function createVault(
   connection: Connection,
@@ -32,7 +28,7 @@ export async function createVault(
   );
 
   const mintRentExempt = await connection.getMinimumBalanceForRentExemption(MintLayout.span);
-  const MAX_VAULT_SIZE = Vault.byteSize; // 1 + 32 + 32 + 32 + 32 + 1 + 32 + 1 + 32 + 1 + 1 + 8;
+  const MAX_VAULT_SIZE = Vault.byteSize;
   const vaultRentExempt = await Vault.getMinimumBalanceForRentExemption(connection);
 
   const vault = Keypair.generate();
@@ -107,6 +103,7 @@ export async function createVault(
       fractionMint,
       redeemTreasury,
       fractionTreasury,
+      vaultAuthority,
     },
   };
 }
