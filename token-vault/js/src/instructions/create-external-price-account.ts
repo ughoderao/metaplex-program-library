@@ -2,53 +2,51 @@ import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import {
   createUpdateExternalPriceAccountInstruction,
   ExternalPriceAccount,
-  ExternalPriceAccountArgs,
   Key,
   UpdateExternalPriceAccountInstructionAccounts,
   UpdateExternalPriceAccountInstructionArgs,
 } from '../generated';
-import { VAULT_PROGRAM_ID } from '../mpl-token-vault';
-
-const WRAPPED_SOL_MINT = new PublicKey('So11111111111111111111111111111111111111112');
-const QUOTE_MINT = WRAPPED_SOL_MINT;
+import { QUOTE_MINT, VAULT_PROGRAM_ID } from '../mpl-token-vault';
 
 export async function createExternalPriceAccount(connection: Connection, payer: PublicKey) {
   // -----------------
   // Create uninitialized external price account
   // -----------------
-  const externalPriceAccount = Keypair.generate();
+  const externalPriceAccountPair = Keypair.generate();
 
-  const MAX_EXTERNAL_ACCOUNT_SIZE = ExternalPriceAccount.byteSize; // 1 + 8 + 32 + 1;
-
-  const epaRentExempt = await connection.getMinimumBalanceForRentExemption(
-    MAX_EXTERNAL_ACCOUNT_SIZE,
+  const rentExempt = await connection.getMinimumBalanceForRentExemption(
+    ExternalPriceAccount.byteSize,
   );
 
-  const uninitializedEPAIx = SystemProgram.createAccount({
+  const createExternalPriceAccountIx = SystemProgram.createAccount({
     fromPubkey: payer,
-    newAccountPubkey: externalPriceAccount.publicKey,
-    lamports: epaRentExempt,
-    space: MAX_EXTERNAL_ACCOUNT_SIZE,
+    newAccountPubkey: externalPriceAccountPair.publicKey,
+    lamports: rentExempt,
+    space: ExternalPriceAccount.byteSize, // 1 + 8 + 32 + 1
     programId: new PublicKey(VAULT_PROGRAM_ID),
   });
 
   // -----------------
   // Initialize External Price Account by "updating" it
   // -----------------
-  const externalPriceAccountArgs: ExternalPriceAccountArgs = {
+  const externalPriceAccount = ExternalPriceAccount.fromArgs({
     key: Key.ExternalAccountKeyV1,
     pricePerShare: 0,
     priceMint: QUOTE_MINT,
     allowedToCombine: true,
-  };
+  });
 
   const args: UpdateExternalPriceAccountInstructionArgs = {
-    externalPriceAccount: ExternalPriceAccount.fromArgs(externalPriceAccountArgs),
+    externalPriceAccount,
   };
   const accounts: UpdateExternalPriceAccountInstructionAccounts = {
-    externalPriceAccount: externalPriceAccount.publicKey,
+    externalPriceAccount: externalPriceAccountPair.publicKey,
   };
 
   const createIx = createUpdateExternalPriceAccountInstruction(accounts, args);
-  return { instructions: [uninitializedEPAIx, createIx], externalPriceAccount };
+  return {
+    instructions: [createExternalPriceAccountIx, createIx],
+    externalPriceAccount: externalPriceAccountPair.publicKey,
+    signers: [externalPriceAccountPair],
+  };
 }
