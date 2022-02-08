@@ -43,10 +43,10 @@ async function initInitVaultAccounts(
   // -----------------
   const [createExternalAccountIxs, createExternalAccountSigners, { externalPriceAccount }] =
     await createExternalPriceAccount(connection, authority);
-  addressLabels.addLabel('externalPriceAccount', externalPriceAccount);
 
   const priceMint = QUOTE_MINT;
-  addressLabels.addLabel('priceMint', priceMint);
+
+  addressLabels.addLabels({ externalPriceAccount, priceMint });
 
   // -----------------
   // Setup Init Vault Accounts
@@ -57,25 +57,8 @@ async function initInitVaultAccounts(
       priceMint,
       externalPriceAccount,
     });
-  const {
-    fractionMint,
-    redeemTreasury,
-    fractionTreasury,
-    vault,
-    authority: vaultAuthority,
-  } = initVaultAccounts;
-  addressLabels.addLabels({
-    vault,
-    fractionMint,
-    redeemTreasury,
-    fractionTreasury,
-    vaultAuthority,
-  });
-  addressLabels.addLabel('vault', vault);
-  addressLabels.addLabel('fractionMint', fractionMint);
-  addressLabels.addLabel('redeemTreasury', redeemTreasury);
-  addressLabels.addLabel('fractionTreasury', fractionTreasury);
-  addressLabels.addLabel('vaultAuthority', vaultAuthority);
+
+  addressLabels.addLabels(initVaultAccounts);
 
   const createAndSetupAccountsTx = new Transaction()
     .add(...createExternalAccountIxs)
