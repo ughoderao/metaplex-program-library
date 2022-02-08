@@ -189,7 +189,7 @@ test('init-vault: init vault twice for same account', async (t) => {
     const initVaulTx = new Transaction().add(initVaultIx);
     try {
       await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
-    } catch (err: any) {
+    } catch (err) {
       assertError(t, err, [/Init Vault/i, /Already initialized/i]);
     }
   }
