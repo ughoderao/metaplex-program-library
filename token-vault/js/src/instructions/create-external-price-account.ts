@@ -47,9 +47,9 @@ export async function createExternalPriceAccount(
     externalPriceAccount: externalPriceAccountPair.publicKey,
   };
 
-  const createIx = createUpdateExternalPriceAccountInstruction(accounts, args);
+  const updateExternalPriceAccountIx = createUpdateExternalPriceAccountInstruction(accounts, args);
   return [
-    [createExternalPriceAccountIx, createIx],
+    [createExternalPriceAccountIx, updateExternalPriceAccountIx],
     [externalPriceAccountPair],
     { externalPriceAccount: externalPriceAccountPair.publicKey },
   ];

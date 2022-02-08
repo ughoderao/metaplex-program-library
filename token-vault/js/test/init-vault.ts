@@ -7,7 +7,7 @@ import {
   assertTransactionSummary,
   PayerTransactionHandler,
 } from '@metaplex-foundation/amman';
-import { Connection, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { LOCALHOST } from '@metaplex-foundation/amman';
 import { createExternalPriceAccount } from '../src/instructions/create-external-price-account';
 import { Key, QUOTE_MINT, Vault, VaultState } from '../src/mpl-token-vault';
@@ -32,9 +32,12 @@ async function init() {
   };
 }
 
-test('init-vault: init vault allowing further share creation', async (t) => {
-  const { transactionHandler, connection, authority } = await init();
-
+async function initInitVaultAccounts(
+  t: test.Test,
+  connection: Connection,
+  transactionHandler: PayerTransactionHandler,
+  authority: PublicKey,
+) {
   // -----------------
   // Create External Account
   // -----------------
@@ -61,44 +64,59 @@ test('init-vault: init vault allowing further share creation', async (t) => {
     vault,
     authority: vaultAuthority,
   } = initVaultAccounts;
+  addressLabels.addLabels({
+    vault,
+    fractionMint,
+    redeemTreasury,
+    fractionTreasury,
+    vaultAuthority,
+  });
   addressLabels.addLabel('vault', vault);
   addressLabels.addLabel('fractionMint', fractionMint);
   addressLabels.addLabel('redeemTreasury', redeemTreasury);
   addressLabels.addLabel('fractionTreasury', fractionTreasury);
   addressLabels.addLabel('vaultAuthority', vaultAuthority);
 
-  // -----------------
-  // Init Vault
-  // -----------------
+  const createAndSetupAccountsTx = new Transaction()
+    .add(...createExternalAccountIxs)
+    .add(...setupAccountsIxs);
+
+  const createAndSetupAccountsRes = await transactionHandler.sendAndConfirmTransaction(
+    createAndSetupAccountsTx,
+    [...createExternalAccountSigners, ...setupAccountsSigners],
+  );
+
+  assertConfirmedTransaction(t, createAndSetupAccountsRes.txConfirmed);
+  assertTransactionSummary(t, createAndSetupAccountsRes.txSummary, {
+    msgRx: [/Update External Price Account/i, /InitializeMint/i, /InitializeAccount/i, /success/],
+  });
+
+  return initVaultAccounts;
+}
+
+test('init-vault: init vault allowing further share creation', async (t) => {
+  const { transactionHandler, connection, authority } = await init();
+  const initVaultAccounts = await initInitVaultAccounts(
+    t,
+    connection,
+    transactionHandler,
+    authority,
+  );
+
   const initVaultIx = await InitVault.initVault(initVaultAccounts, {
     allowFurtherShareCreation: true,
   });
 
-  // Need to split those up to avoid: Transaction too large: 1239 > 1232
-  const createExternalAccountTx = new Transaction().add(...createExternalAccountIxs);
-  const setupAccountsAndInitVaultTx = new Transaction().add(...setupAccountsIxs).add(initVaultIx);
+  const initVaulTx = new Transaction().add(initVaultIx);
+  const initVaultRes = await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
 
-  // Create external account
-  const createExternalAccountRes = await transactionHandler.sendAndConfirmTransaction(
-    createExternalAccountTx,
-    createExternalAccountSigners,
-  );
-
-  assertConfirmedTransaction(t, createExternalAccountRes.txConfirmed);
-  assertTransactionSummary(t, createExternalAccountRes.txSummary, {
-    msgRx: [/Update External Price Account/i, /success/],
+  assertConfirmedTransaction(t, initVaultRes.txConfirmed);
+  assertTransactionSummary(t, initVaultRes.txSummary, {
+    msgRx: [/Init Vault/, /success/],
   });
 
-  // Setup Accounts and Init Vault
-  const createVaultRes = await transactionHandler.sendAndConfirmTransaction(
-    setupAccountsAndInitVaultTx,
-    setupAccountsSigners,
-  );
-
-  assertConfirmedTransaction(t, createVaultRes.txConfirmed);
-  assertTransactionSummary(t, createVaultRes.txSummary, {
-    msgRx: [/InitializeMint/i, /InitializeAccount/i, /Init Vault/, /success/],
-  });
+  const { fractionMint, redeemTreasury, fractionTreasury, vault, pricingLookupAddress } =
+    initVaultAccounts;
 
   const vaultAccountInfo = await connection.getAccountInfo(vault);
   const [vaultAccount] = Vault.fromAccountInfo(vaultAccountInfo);
@@ -110,7 +128,7 @@ test('init-vault: init vault allowing further share creation', async (t) => {
     fractionMint: spokSamePubkey(fractionMint),
     redeemTreasury: spokSamePubkey(redeemTreasury),
     fractionTreasury: spokSamePubkey(fractionTreasury),
-    pricingLookupAddress: spokSamePubkey(externalPriceAccount),
+    pricingLookupAddress: spokSamePubkey(pricingLookupAddress),
     authority: spokSamePubkey(authority),
     allowFurtherShareCreation: true,
     tokenTypeCount: 0,
