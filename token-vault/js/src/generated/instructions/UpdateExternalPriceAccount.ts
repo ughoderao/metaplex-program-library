@@ -1,9 +1,9 @@
-import * as definedTypes from '../types';
+import * as accounts from '../accounts';
 import * as beet from '@metaplex-foundation/beet';
 import * as web3 from '@solana/web3.js';
 
 export type UpdateExternalPriceAccountInstructionArgs = {
-  externalPriceAccount: definedTypes.ExternalPriceAccount;
+  externalPriceAccount: accounts.ExternalPriceAccount;
 };
 const UpdateExternalPriceAccountStruct = new beet.BeetArgsStruct<
   UpdateExternalPriceAccountInstructionArgs & {
@@ -12,7 +12,7 @@ const UpdateExternalPriceAccountStruct = new beet.BeetArgsStruct<
 >(
   [
     ['instructionDiscriminator', beet.u8],
-    ['externalPriceAccount', definedTypes.externalPriceAccountBeet],
+    ['externalPriceAccount', accounts.externalPriceAccountBeet],
   ],
   'UpdateExternalPriceAccountInstructionArgs',
 );
