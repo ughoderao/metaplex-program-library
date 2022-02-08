@@ -14,7 +14,7 @@ test('external account: create', async (t) => {
   const [priceMint] = addressLabels.genKeypair('priceMint');
   addressLabels.addLabel('priceMint', priceMint);
 
-  const { instructions, externalPriceAccount, signers } = await createExternalPriceAccount(
+  const [instructions, signers, { externalPriceAccount }] = await createExternalPriceAccount(
     connection,
     authority,
   );

@@ -4,84 +4,84 @@ import {
   Token,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
-import { Keypair, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import { Keypair, PublicKey, Signer, SystemProgram, TransactionInstruction } from '@solana/web3.js';
 
 // -----------------
-// Helpers from common/src/actions/action.ts
+// Helpers from common/src/actions/action.ts adapted to return instructions + signers instead of mutating
+// -----------------
+
+// -----------------
+// Init Mint Account
 // -----------------
 export function createMint(
-  instructions: TransactionInstruction[],
   payer: PublicKey,
   mintRentExempt: number,
   decimals: number,
   owner: PublicKey,
   freezeAuthority: PublicKey,
-  signers: Keypair[],
-) {
-  const account = createUninitializedMint(instructions, payer, mintRentExempt, signers);
-
-  instructions.push(
-    Token.createInitMintInstruction(TOKEN_PROGRAM_ID, account, decimals, owner, freezeAuthority),
+): [TransactionInstruction[], Signer[], { mintAccount: PublicKey }] {
+  const [createMintIx, createMintSigner, mintAccount] = createUninitializedMint(
+    payer,
+    mintRentExempt,
   );
 
-  return account;
+  const initMintIx = Token.createInitMintInstruction(
+    TOKEN_PROGRAM_ID,
+    mintAccount,
+    decimals,
+    owner,
+    freezeAuthority,
+  );
+
+  return [[createMintIx, initMintIx], [createMintSigner], { mintAccount }];
 }
 
 export function createUninitializedMint(
-  instructions: TransactionInstruction[],
   payer: PublicKey,
   amount: number,
-  signers: Keypair[],
-) {
-  const account = Keypair.generate();
-  instructions.push(
-    SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: account.publicKey,
-      lamports: amount,
-      space: MintLayout.span,
-      programId: TOKEN_PROGRAM_ID,
-    }),
-  );
+): [TransactionInstruction, Signer, PublicKey] {
+  const mintAccount = Keypair.generate();
+  const instruction = SystemProgram.createAccount({
+    fromPubkey: payer,
+    newAccountPubkey: mintAccount.publicKey,
+    lamports: amount,
+    space: MintLayout.span,
+    programId: TOKEN_PROGRAM_ID,
+  });
 
-  signers.push(account);
-
-  return account.publicKey;
+  return [instruction, mintAccount, mintAccount.publicKey];
 }
 
+// -----------------
+// Init Token Account
+// -----------------
 export function createTokenAccount(
-  instructions: TransactionInstruction[],
   payer: PublicKey,
   accountRentExempt: number,
   mint: PublicKey,
   owner: PublicKey,
-  signers: Keypair[],
-) {
-  const account = createUninitializedAccount(instructions, payer, accountRentExempt, signers);
+): [TransactionInstruction[], Signer[], { tokenAccount: PublicKey }] {
+  const [createAccountIx, signer, account] = createUninitializedTokenAccount(
+    payer,
+    accountRentExempt,
+  );
+  const initAccountIx = Token.createInitAccountInstruction(TOKEN_PROGRAM_ID, mint, account, owner);
 
-  instructions.push(Token.createInitAccountInstruction(TOKEN_PROGRAM_ID, mint, account, owner));
-
-  return account;
+  return [[createAccountIx, initAccountIx], [signer], { tokenAccount: account }];
 }
 
-export function createUninitializedAccount(
-  instructions: TransactionInstruction[],
+export function createUninitializedTokenAccount(
   payer: PublicKey,
   amount: number,
-  signers: Keypair[],
-) {
-  const account = Keypair.generate();
-  instructions.push(
-    SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: account.publicKey,
-      lamports: amount,
-      space: TokenAccountLayout.span,
-      programId: TOKEN_PROGRAM_ID,
-    }),
-  );
+): [TransactionInstruction, Signer, PublicKey] {
+  const tokenAccount = Keypair.generate();
+  const instruction = SystemProgram.createAccount({
+    fromPubkey: payer,
+    newAccountPubkey: tokenAccount.publicKey,
+    lamports: amount,
+    space: TokenAccountLayout.span,
+    programId: TOKEN_PROGRAM_ID,
+  });
 
-  signers.push(account);
-
-  return account.publicKey;
+  return [instruction, tokenAccount, tokenAccount.publicKey];
 }

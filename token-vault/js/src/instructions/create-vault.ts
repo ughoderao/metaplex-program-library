@@ -1,24 +1,23 @@
 import { AccountLayout as TokenAccountLayout, MintLayout } from '@solana/spl-token';
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  TransactionInstruction,
-} from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { createMint, createTokenAccount } from '../common/helpers';
 import { createInitVaultInstruction, InitVaultInstructionAccounts, Vault } from '../generated';
 import { VAULT_PREFIX, VAULT_PROGRAM_ID } from '../mpl-token-vault';
+import { InstructionsWithAccounts } from '../types';
 
 export async function createVault(
   connection: Connection,
   args: { authority: PublicKey; priceMint: PublicKey; externalPriceAccount: PublicKey },
-) {
+): Promise<
+  InstructionsWithAccounts<{
+    vault: PublicKey;
+    fractionMint: PublicKey;
+    redeemTreasury: PublicKey;
+    fractionTreasury: PublicKey;
+    vaultAuthority: PublicKey;
+  }>
+> {
   const { authority, priceMint, externalPriceAccount } = args;
-
-  // NOTE: these signers and instructions are pushed onto inside the respective create* calls
-  const signers: Keypair[] = [];
-  const instructions: TransactionInstruction[] = [];
 
   // -----------------
   // Rent Exempts
@@ -42,33 +41,19 @@ export async function createVault(
   // -----------------
   // Account Setups
   // -----------------
-  const fractionMint = createMint(
-    instructions,
+  const [fractionMintIxs, fractionMintSigners, { mintAccount: fractionMint }] = createMint(
     authority,
     mintRentExempt,
     0,
     vaultAuthority,
     vaultAuthority,
-    signers,
   );
 
-  const redeemTreasury = createTokenAccount(
-    instructions,
-    authority,
-    tokenAccountRentExempt,
-    priceMint,
-    vaultAuthority,
-    signers,
-  );
+  const [redeemTreasuryIxs, redeemTreasurySigners, { tokenAccount: redeemTreasury }] =
+    createTokenAccount(authority, tokenAccountRentExempt, priceMint, vaultAuthority);
 
-  const fractionTreasury = createTokenAccount(
-    instructions,
-    authority,
-    tokenAccountRentExempt,
-    fractionMint,
-    vaultAuthority,
-    signers,
-  );
+  const [fractionTreasuryIxs, fractionTreasurySigners, { tokenAccount: fractionTreasury }] =
+    createTokenAccount(authority, tokenAccountRentExempt, fractionMint, vaultAuthority);
 
   const uninitializedVaultIx = SystemProgram.createAccount({
     fromPubkey: authority,
@@ -77,7 +62,6 @@ export async function createVault(
     space: MAX_VAULT_SIZE,
     programId: vaultProgramPublicKey,
   });
-  signers.push(vault);
 
   // -----------------
   // Init Vault Instruction
@@ -95,15 +79,21 @@ export async function createVault(
     initVaultArgs: { allowFurtherShareCreation: true },
   });
 
-  return {
-    instructions: [...instructions, uninitializedVaultIx, initVaultIx],
-    signers,
-    accounts: {
+  return [
+    [
+      ...fractionMintIxs,
+      ...redeemTreasuryIxs,
+      ...fractionTreasuryIxs,
+      uninitializedVaultIx,
+      initVaultIx,
+    ],
+    [...fractionMintSigners, ...redeemTreasurySigners, ...fractionTreasurySigners, vault],
+    {
       vault: vault.publicKey,
       fractionMint,
       redeemTreasury,
       fractionTreasury,
       vaultAuthority,
     },
-  };
+  ];
 }

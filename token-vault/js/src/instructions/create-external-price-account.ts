@@ -7,8 +7,12 @@ import {
   UpdateExternalPriceAccountInstructionArgs,
 } from '../generated';
 import { QUOTE_MINT, VAULT_PROGRAM_ID } from '../mpl-token-vault';
+import { InstructionsWithAccounts } from '../types';
 
-export async function createExternalPriceAccount(connection: Connection, payer: PublicKey) {
+export async function createExternalPriceAccount(
+  connection: Connection,
+  payer: PublicKey,
+): Promise<InstructionsWithAccounts<{ externalPriceAccount: PublicKey }>> {
   // -----------------
   // Create uninitialized external price account
   // -----------------
@@ -44,9 +48,9 @@ export async function createExternalPriceAccount(connection: Connection, payer: 
   };
 
   const createIx = createUpdateExternalPriceAccountInstruction(accounts, args);
-  return {
-    instructions: [createExternalPriceAccountIx, createIx],
-    externalPriceAccount: externalPriceAccountPair.publicKey,
-    signers: [externalPriceAccountPair],
-  };
+  return [
+    [createExternalPriceAccountIx, createIx],
+    [externalPriceAccountPair],
+    { externalPriceAccount: externalPriceAccountPair.publicKey },
+  ];
 }

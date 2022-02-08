@@ -34,21 +34,18 @@ async function init() {
 
 test('init-vault: create vault', async (t) => {
   const { transactionHandler, connection, authority } = await init();
-  const {
-    instructions: createExternalAccountIxs,
-    signers: createExternalAccountSigners,
-    externalPriceAccount,
-  } = await createExternalPriceAccount(connection, authority);
+  const [createExternalAccountIxs, createExternalAccountSigners, { externalPriceAccount }] =
+    await createExternalPriceAccount(connection, authority);
   addressLabels.addLabel('externalPriceAccount', externalPriceAccount);
 
   const priceMint = QUOTE_MINT;
   addressLabels.addLabel('priceMint', priceMint);
 
-  const {
-    instructions: createVaultIxs,
-    signers: createVaultSigners,
-    accounts: { vault, fractionMint, redeemTreasury, fractionTreasury, vaultAuthority },
-  } = await createVault(connection, {
+  const [
+    createVaultIxs,
+    createVaultSigners,
+    { vault, fractionMint, redeemTreasury, fractionTreasury, vaultAuthority },
+  ] = await createVault(connection, {
     authority,
     priceMint,
     externalPriceAccount,
