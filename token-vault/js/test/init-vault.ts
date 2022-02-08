@@ -9,11 +9,11 @@ import {
 } from '@metaplex-foundation/amman';
 import { Connection, Transaction } from '@solana/web3.js';
 import { LOCALHOST } from '@metaplex-foundation/amman';
-import { createVault } from '../src/instructions/create-vault';
 import { createExternalPriceAccount } from '../src/instructions/create-external-price-account';
 import { Key, QUOTE_MINT, Vault, VaultState } from '../src/mpl-token-vault';
 import spok from 'spok';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { InitVault } from '../src/instructions/init-vault';
 
 killStuckProcess();
 
@@ -32,8 +32,12 @@ async function init() {
   };
 }
 
-test('init-vault: create vault', async (t) => {
+test('init-vault: init vault allowing further share creation', async (t) => {
   const { transactionHandler, connection, authority } = await init();
+
+  // -----------------
+  // Create External Account
+  // -----------------
   const [createExternalAccountIxs, createExternalAccountSigners, { externalPriceAccount }] =
     await createExternalPriceAccount(connection, authority);
   addressLabels.addLabel('externalPriceAccount', externalPriceAccount);
@@ -41,24 +45,38 @@ test('init-vault: create vault', async (t) => {
   const priceMint = QUOTE_MINT;
   addressLabels.addLabel('priceMint', priceMint);
 
-  const [
-    createVaultIxs,
-    createVaultSigners,
-    { vault, fractionMint, redeemTreasury, fractionTreasury, vaultAuthority },
-  ] = await createVault(connection, {
-    authority,
-    priceMint,
-    externalPriceAccount,
-  });
+  // -----------------
+  // Setup Init Vault Accounts
+  // -----------------
+  const [setupAccountsIxs, setupAccountsSigners, initVaultAccounts] =
+    await InitVault.setupInitVaultAccounts(connection, {
+      authority,
+      priceMint,
+      externalPriceAccount,
+    });
+  const {
+    fractionMint,
+    redeemTreasury,
+    fractionTreasury,
+    vault,
+    authority: vaultAuthority,
+  } = initVaultAccounts;
   addressLabels.addLabel('vault', vault);
   addressLabels.addLabel('fractionMint', fractionMint);
   addressLabels.addLabel('redeemTreasury', redeemTreasury);
   addressLabels.addLabel('fractionTreasury', fractionTreasury);
   addressLabels.addLabel('vaultAuthority', vaultAuthority);
 
+  // -----------------
+  // Init Vault
+  // -----------------
+  const initVaultIx = await InitVault.initVault(initVaultAccounts, {
+    allowFurtherShareCreation: true,
+  });
+
   // Need to split those up to avoid: Transaction too large: 1239 > 1232
   const createExternalAccountTx = new Transaction().add(...createExternalAccountIxs);
-  const createVaultTx = new Transaction().add(...createVaultIxs);
+  const setupAccountsAndInitVaultTx = new Transaction().add(...setupAccountsIxs).add(initVaultIx);
 
   // Create external account
   const createExternalAccountRes = await transactionHandler.sendAndConfirmTransaction(
@@ -71,10 +89,10 @@ test('init-vault: create vault', async (t) => {
     msgRx: [/Update External Price Account/i, /success/],
   });
 
-  // Create Vault
+  // Setup Accounts and Init Vault
   const createVaultRes = await transactionHandler.sendAndConfirmTransaction(
-    createVaultTx,
-    createVaultSigners,
+    setupAccountsAndInitVaultTx,
+    setupAccountsSigners,
   );
 
   assertConfirmedTransaction(t, createVaultRes.txConfirmed);
