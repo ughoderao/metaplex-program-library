@@ -922,6 +922,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metaplex-foundation/amman@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "@metaplex-foundation/amman@npm:0.0.10"
+  dependencies:
+    "@solana/spl-token": ^0.1.8
+    "@solana/web3.js": ^1.31.0
+    debug: ^4.3.3
+    wait-on: ^6.0.0
+    yargs: ^17.3.0
+  bin:
+    amman: dist/cli/amman.js
+  checksum: 6f9fd69ec4a895e7daa45b2e38caa36640b247ca6b16dbd00407089a93f5844fdc51d8b3b3155d8ae737b2c11ac875646a967244af588d45387af5bc3fbac713
+  languageName: node
+  linkType: hard
+
 "@metaplex-foundation/amman@npm:^0.0.3":
   version: 0.0.3
   resolution: "@metaplex-foundation/amman@npm:0.0.3"
@@ -1233,7 +1248,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/mpl-token-vault@workspace:token-vault/js"
   dependencies:
-    "@metaplex-foundation/amman": ^0.0.9
+    "@metaplex-foundation/amman": ^0.0.10
     "@metaplex-foundation/beet": ^0.0.8
     "@metaplex-foundation/beet-solana": ^0.0.6
     "@metaplex-foundation/mpl-core": ^0.0.2
