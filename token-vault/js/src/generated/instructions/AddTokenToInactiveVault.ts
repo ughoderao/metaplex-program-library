@@ -20,9 +20,11 @@ const AddTokenToInactiveVaultStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _AddTokenToInactiveVault_ instruction
  *
- * @property [writable] safetyDepositAccount Uninitialized safety deposit box account address (will be created and allocated by this endpoint) Address should be pda with seed of [PREFIX, vault_address, token_mint_address]
+ * @property [writable] safetyDepositAccount Uninitialized safety deposit box account address (will be created and
+ * allocated by this endpoint) Address should be pda with seed of [PREFIX, vault_address, token_mint_address]
  * @property [writable] tokenAccount Initialized Token account
- * @property [writable] store Initialized Token store account with authority of this program, this will get set on the safety deposit box
+ * @property [writable] store Initialized Token store account with authority of this program, this will get set on the
+ * safety deposit box
  * @property [writable] vault Initialized inactive fractionalized token vault
  * @property [signer] vaultAuthority Authority on the vault
  * @property [signer] payer Payer
@@ -37,6 +39,7 @@ export type AddTokenToInactiveVaultInstructionAccounts = {
   vaultAuthority: web3.PublicKey;
   payer: web3.PublicKey;
   transferAuthority: web3.PublicKey;
+  // TODO(thlorenz): solita should make this SystemProgram.programId,
   systemAccount: web3.PublicKey;
 };
 
