@@ -4,6 +4,7 @@ import {
   init,
   initInitVaultAccounts,
   killStuckProcess,
+  spokOffCurvePubkey,
   spokSameBignum,
   spokSamePubkey,
 } from './utils';
@@ -21,13 +22,8 @@ import { InitVault } from '../src/instructions/init-vault';
 killStuckProcess();
 
 test('init-vault: init vault allowing further share creation', async (t) => {
-  const { transactionHandler, connection, authority } = await init();
-  const initVaultAccounts = await initInitVaultAccounts(
-    t,
-    connection,
-    transactionHandler,
-    authority,
-  );
+  const { transactionHandler, connection, payer } = await init();
+  const initVaultAccounts = await initInitVaultAccounts(t, connection, transactionHandler, payer);
 
   const initVaultIx = await InitVault.initVault(initVaultAccounts, {
     allowFurtherShareCreation: true,
@@ -55,7 +51,7 @@ test('init-vault: init vault allowing further share creation', async (t) => {
     redeemTreasury: spokSamePubkey(redeemTreasury),
     fractionTreasury: spokSamePubkey(fractionTreasury),
     pricingLookupAddress: spokSamePubkey(pricingLookupAddress),
-    authority: spokSamePubkey(authority),
+    authority: spokOffCurvePubkey,
     allowFurtherShareCreation: true,
     tokenTypeCount: 0,
     state: VaultState.Inactive,
@@ -64,7 +60,7 @@ test('init-vault: init vault allowing further share creation', async (t) => {
 });
 
 test('init-vault: init vault not allowing further share creation', async (t) => {
-  const { transactionHandler, connection, authority } = await init();
+  const { transactionHandler, connection, payer: authority } = await init();
   const initVaultAccounts = await initInitVaultAccounts(
     t,
     connection,
@@ -98,7 +94,7 @@ test('init-vault: init vault not allowing further share creation', async (t) => 
     redeemTreasury: spokSamePubkey(redeemTreasury),
     fractionTreasury: spokSamePubkey(fractionTreasury),
     pricingLookupAddress: spokSamePubkey(pricingLookupAddress),
-    authority: spokSamePubkey(authority),
+    authority: spokOffCurvePubkey,
     allowFurtherShareCreation: false,
     tokenTypeCount: 0,
     state: VaultState.Inactive,
@@ -107,7 +103,7 @@ test('init-vault: init vault not allowing further share creation', async (t) => 
 });
 
 test('init-vault: init vault twice for same account', async (t) => {
-  const { transactionHandler, connection, authority } = await init();
+  const { transactionHandler, connection, payer: authority } = await init();
   const initVaultAccounts = await initInitVaultAccounts(
     t,
     connection,

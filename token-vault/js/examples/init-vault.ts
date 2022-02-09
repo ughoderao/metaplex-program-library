@@ -32,18 +32,18 @@ const connection = new Connection(host, 'confirmed');
 // -----------------
 async function main() {
   // This is the payer account which should have sufficient amount of SOL
-  const authority = await fundedAuthority();
+  const payer = await fundedPayer();
 
   // -----------------
   // 1. Setup Accounts to use when initializing the vault
   //    You may not need to do this if you already have those accounts
   // -----------------
   const [createExternalAccountIxs, createExternalAccountSigners, { externalPriceAccount }] =
-    await createExternalPriceAccount(connection, authority.publicKey);
+    await createExternalPriceAccount(connection, payer.publicKey);
 
   const [setupAccountsIxs, setupAccountsSigners, initVaultAccounts] =
     await InitVault.setupInitVaultAccounts(connection, {
-      authority: authority.publicKey,
+      payer: payer.publicKey,
       priceMint,
       externalPriceAccount,
     });
@@ -53,7 +53,7 @@ async function main() {
     .add(...setupAccountsIxs);
 
   await sendAndConfirmTransaction(connection, createAndSetupAccountsTx, [
-    authority,
+    payer,
     ...createExternalAccountSigners,
     ...setupAccountsSigners,
   ]);
@@ -65,7 +65,7 @@ async function main() {
     allowFurtherShareCreation: true,
   });
   const initVaulTx = new Transaction().add(initVaultIx);
-  await sendAndConfirmTransaction(connection, initVaulTx, [authority]);
+  await sendAndConfirmTransaction(connection, initVaulTx, [payer]);
 
   // -----------------
   // 3. We can now query the initialized vault
@@ -85,7 +85,7 @@ main()
 // -----------------
 // Helpers not relevant to this example
 // -----------------
-async function fundedAuthority() {
+async function fundedPayer() {
   const authority = Keypair.generate();
   const sig = await connection.requestAirdrop(authority.publicKey, 1 * LAMPORTS_PER_SOL);
   await connection.confirmTransaction(sig);

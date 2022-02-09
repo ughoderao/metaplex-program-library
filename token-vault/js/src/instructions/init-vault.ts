@@ -22,7 +22,7 @@ export class InitVault {
   static async setupInitVaultAccounts(
     connection: Connection,
     args: {
-      authority: PublicKey;
+      payer: PublicKey;
       priceMint: PublicKey;
       externalPriceAccount: PublicKey;
     },
@@ -43,7 +43,7 @@ export class InitVault {
     const { vaultPair: vault, vaultAuthority } = await vaultAccountPDA();
 
     const [fractionMintIxs, fractionMintSigners, { mintAccount: fractionMint }] = createMint(
-      args.authority,
+      args.payer,
       mintRentExempt,
       0,
       vaultAuthority,
@@ -51,13 +51,13 @@ export class InitVault {
     );
 
     const [redeemTreasuryIxs, redeemTreasurySigners, { tokenAccount: redeemTreasury }] =
-      createTokenAccount(args.authority, tokenAccountRentExempt, args.priceMint, vaultAuthority);
+      createTokenAccount(args.payer, tokenAccountRentExempt, args.priceMint, vaultAuthority);
 
     const [fractionTreasuryIxs, fractionTreasurySigners, { tokenAccount: fractionTreasury }] =
-      createTokenAccount(args.authority, tokenAccountRentExempt, fractionMint, vaultAuthority);
+      createTokenAccount(args.payer, tokenAccountRentExempt, fractionMint, vaultAuthority);
 
     const uninitializedVaultIx = SystemProgram.createAccount({
-      fromPubkey: args.authority,
+      fromPubkey: args.payer,
       newAccountPubkey: vault.publicKey,
       lamports: vaultRentExempt,
       space: Vault.byteSize,
@@ -72,7 +72,7 @@ export class InitVault {
         redeemTreasury,
         fractionTreasury,
         vault: vault.publicKey,
-        authority: args.authority,
+        authority: vaultAuthority,
         pricingLookupAddress: args.externalPriceAccount,
       },
     ];

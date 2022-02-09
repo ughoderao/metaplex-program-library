@@ -10,13 +10,13 @@ import { createExternalPriceAccount } from '../src/instructions/create-external-
 killStuckProcess();
 
 test('external account: create', async (t) => {
-  const { transactionHandler, connection, authority } = await init();
+  const { transactionHandler, connection, payer } = await init();
   const [priceMint] = addressLabels.genKeypair('priceMint');
   addressLabels.addLabel('priceMint', priceMint);
 
   const [instructions, signers, { externalPriceAccount }] = await createExternalPriceAccount(
     connection,
-    authority,
+    payer,
   );
   addressLabels.addLabel('externalPriceAccount', externalPriceAccount);
 

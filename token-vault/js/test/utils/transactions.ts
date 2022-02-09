@@ -8,20 +8,25 @@ import {
 } from '@metaplex-foundation/amman';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { addressLabels } from '.';
-import { createExternalPriceAccount, InitVault, QUOTE_MINT } from '../../src/mpl-token-vault';
+import {
+  createExternalPriceAccount,
+  InitVault,
+  InitVaultInstructionAccounts,
+  QUOTE_MINT,
+} from '../../src/mpl-token-vault';
 
 export async function init() {
-  const [authority, authorityPair] = addressLabels.genKeypair('authority');
+  const [payer, payerPair] = addressLabels.genKeypair('payer');
 
   const connection = new Connection(LOCALHOST, 'confirmed');
-  await airdrop(connection, authority, 2);
+  await airdrop(connection, payer, 2);
 
-  const transactionHandler = new PayerTransactionHandler(connection, authorityPair);
+  const transactionHandler = new PayerTransactionHandler(connection, payerPair);
   return {
     transactionHandler,
     connection,
-    authority,
-    authorityPair,
+    payer,
+    payerPair,
   };
 }
 
@@ -29,13 +34,13 @@ export async function initInitVaultAccounts(
   t: Test,
   connection: Connection,
   transactionHandler: PayerTransactionHandler,
-  authority: PublicKey,
-) {
+  payer: PublicKey,
+): Promise<InitVaultInstructionAccounts> {
   // -----------------
   // Create External Account
   // -----------------
   const [createExternalAccountIxs, createExternalAccountSigners, { externalPriceAccount }] =
-    await createExternalPriceAccount(connection, authority);
+    await createExternalPriceAccount(connection, payer);
 
   const priceMint = QUOTE_MINT;
 
@@ -46,7 +51,7 @@ export async function initInitVaultAccounts(
   // -----------------
   const [setupAccountsIxs, setupAccountsSigners, initVaultAccounts] =
     await InitVault.setupInitVaultAccounts(connection, {
-      authority,
+      payer,
       priceMint,
       externalPriceAccount,
     });
@@ -71,17 +76,16 @@ export async function initInitVaultAccounts(
 }
 
 export async function initVault(t: Test, args: { allowFurtherShareCreation: boolean }) {
-  const { transactionHandler, connection, authority } = await init();
-  const initVaultAccounts = await initInitVaultAccounts(
-    t,
-    connection,
-    transactionHandler,
-    authority,
-  );
+  const { transactionHandler, connection, payer } = await init();
+  const initVaultAccounts = await initInitVaultAccounts(t, connection, transactionHandler, payer);
   const initVaultIx = await InitVault.initVault(initVaultAccounts, args);
 
   const initVaulTx = new Transaction().add(initVaultIx);
   await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
 
-  return initVaultAccounts;
+  return {
+    connection,
+    transactionHandler,
+    accounts: { payer, ...initVaultAccounts },
+  };
 }
