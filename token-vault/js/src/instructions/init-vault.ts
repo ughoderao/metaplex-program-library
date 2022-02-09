@@ -26,7 +26,7 @@ export class InitVault {
       priceMint: PublicKey;
       externalPriceAccount: PublicKey;
     },
-  ): Promise<InstructionsWithAccounts<InitVaultInstructionAccounts>> {
+  ): Promise<InstructionsWithAccounts<InitVaultInstructionAccounts & { vaultPair: Keypair }>> {
     // -----------------
     // Rent Exempts
     // -----------------
@@ -72,6 +72,7 @@ export class InitVault {
         redeemTreasury,
         fractionTreasury,
         vault: vault.publicKey,
+        vaultPair: vault,
         authority: vaultAuthority,
         pricingLookupAddress: args.externalPriceAccount,
       },

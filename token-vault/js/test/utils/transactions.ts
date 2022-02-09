@@ -6,7 +6,7 @@ import {
   LOCALHOST,
   PayerTransactionHandler,
 } from '@metaplex-foundation/amman';
-import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { addressLabels } from '.';
 import {
   createExternalPriceAccount,
@@ -35,7 +35,7 @@ export async function initInitVaultAccounts(
   connection: Connection,
   transactionHandler: PayerTransactionHandler,
   payer: PublicKey,
-): Promise<InitVaultInstructionAccounts> {
+): Promise<InitVaultInstructionAccounts & { vaultPair: Keypair }> {
   // -----------------
   // Create External Account
   // -----------------
@@ -76,7 +76,7 @@ export async function initInitVaultAccounts(
 }
 
 export async function initVault(t: Test, args: { allowFurtherShareCreation: boolean }) {
-  const { transactionHandler, connection, payer } = await init();
+  const { transactionHandler, connection, payer, payerPair } = await init();
   const initVaultAccounts = await initInitVaultAccounts(t, connection, transactionHandler, payer);
   const initVaultIx = await InitVault.initVault(initVaultAccounts, args);
 
@@ -86,6 +86,6 @@ export async function initVault(t: Test, args: { allowFurtherShareCreation: bool
   return {
     connection,
     transactionHandler,
-    accounts: { payer, ...initVaultAccounts },
+    accounts: { payer, payerPair, ...initVaultAccounts },
   };
 }
