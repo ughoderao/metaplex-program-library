@@ -32,13 +32,35 @@ const AddTokenToInactiveVaultStruct = new beet.BeetArgsStruct<
  * @property [] systemAccount System account sysvar
  */
 export type AddTokenToInactiveVaultInstructionAccounts = {
+  // initialized       : no
+  // key               : != safety_deposit_account_key (PDA for vault  + tokenAccount)
   safetyDepositAccount: web3.PublicKey;
+
+  // owner       : TokenProgram
+  // initialized : yes
+  // amount      : > 0 && >= args.amount
   tokenAccount: web3.PublicKey;
+
+  // owner          : TokenProgram
+  // initialized    : yes
+  // amount         : > 0
+  // owner          : vault PDA
+  // delegate       : none
+  // closeAuthority : none
   store: web3.PublicKey;
+
+  // owner        : vault PDA
+  // tokenProgram : TokenProgram
+  // state        : inactive
   vault: web3.PublicKey;
+
+  // key: vault.authority
   vaultAuthority: web3.PublicKey;
+
   payer: web3.PublicKey;
+
   transferAuthority: web3.PublicKey;
+
   // TODO(thlorenz): solita should make this SystemProgram.programId,
   systemAccount: web3.PublicKey;
 };
