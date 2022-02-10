@@ -23,6 +23,7 @@ export class InitVault {
     connection: Connection,
     args: {
       payer: PublicKey;
+      vaultAuthority: PublicKey;
       priceMint: PublicKey;
       externalPriceAccount: PublicKey;
     },
@@ -40,21 +41,31 @@ export class InitVault {
     // -----------------
     // Account Setups
     // -----------------
-    const { vaultPair: vault, vaultAuthority } = await vaultAccountPDA();
+    const { vaultPair: vault, vaultPDA } = await vaultAccountPDA();
 
     const [fractionMintIxs, fractionMintSigners, { mintAccount: fractionMint }] = createMint(
       args.payer,
       mintRentExempt,
       0,
-      vaultAuthority,
-      vaultAuthority,
+      vaultPDA, // mintAuthority
+      vaultPDA, // freezeAuthority
     );
 
     const [redeemTreasuryIxs, redeemTreasurySigners, { tokenAccount: redeemTreasury }] =
-      createTokenAccount(args.payer, tokenAccountRentExempt, args.priceMint, vaultAuthority);
+      createTokenAccount(
+        args.payer,
+        tokenAccountRentExempt,
+        args.priceMint, // mint
+        vaultPDA, // owner
+      );
 
     const [fractionTreasuryIxs, fractionTreasurySigners, { tokenAccount: fractionTreasury }] =
-      createTokenAccount(args.payer, tokenAccountRentExempt, fractionMint, vaultAuthority);
+      createTokenAccount(
+        args.payer,
+        tokenAccountRentExempt,
+        fractionMint, // mint
+        vaultPDA, // owner
+      );
 
     const uninitializedVaultIx = SystemProgram.createAccount({
       fromPubkey: args.payer,
@@ -73,7 +84,7 @@ export class InitVault {
         fractionTreasury,
         vault: vault.publicKey,
         vaultPair: vault,
-        authority: vaultAuthority,
+        authority: args.vaultAuthority,
         pricingLookupAddress: args.externalPriceAccount,
       },
     ];
@@ -93,7 +104,7 @@ export class InitVault {
 async function vaultAccountPDA() {
   const vaultPair = Keypair.generate();
 
-  const [vaultAuthority] = await PublicKey.findProgramAddress(
+  const [vaultPDA] = await PublicKey.findProgramAddress(
     [
       Buffer.from(VAULT_PREFIX),
       VAULT_PROGRAM_PUBLIC_KEY.toBuffer(),
@@ -102,5 +113,5 @@ async function vaultAccountPDA() {
     VAULT_PROGRAM_PUBLIC_KEY,
   );
 
-  return { vaultPair, vaultAuthority };
+  return { vaultPair, vaultPDA };
 }

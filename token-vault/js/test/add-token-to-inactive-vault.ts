@@ -13,13 +13,13 @@ test('inactive vault: add token', async (t) => {
   const {
     transactionHandler,
     connection,
-    accounts: { payer, vault, authority },
+    accounts: { payer, vault, authority: vaultAuthority, vaultAuthorityPair },
   } = await initVault(t, { allowFurtherShareCreation: true });
 
   const [createMintIxs, createMintSigners, { mintAccount }] =
     await AddTokenToInactiveVault.createTokenMint(connection, payer);
 
-  const inactiveVault = new AddTokenToInactiveVault(connection, vault, authority, mintAccount);
+  const inactiveVault = new AddTokenToInactiveVault(connection, vault, vaultAuthority, mintAccount);
 
   const safetyDeposit = await inactiveVault.getSafetyDepositAccount();
   const [tokenAccountIxs, tokenAccountSigners, { tokenAccount }] =
@@ -36,7 +36,7 @@ test('inactive vault: add token', async (t) => {
     tokenAccount,
     store,
     vault,
-    vaultAuthority: authority,
+    vaultAuthority,
     payer,
     transferAuthority,
   };
@@ -55,6 +55,7 @@ test('inactive vault: add token', async (t) => {
     ...storeAccountSigners,
     ...approveTransferSigners,
     transferAuthorityPair,
+    vaultAuthorityPair,
   ];
 
   logDebug({ signers: addressLabels.resolveKeypairs(signers) });

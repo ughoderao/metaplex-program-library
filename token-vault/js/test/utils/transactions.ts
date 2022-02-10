@@ -17,6 +17,7 @@ import {
 
 export async function init() {
   const [payer, payerPair] = addressLabels.genKeypair('payer');
+  const [vaultAuthority, vaultAuthorityPair] = addressLabels.genKeypair('vaultAuthority');
 
   const connection = new Connection(LOCALHOST, 'confirmed');
   await airdrop(connection, payer, 2);
@@ -27,6 +28,8 @@ export async function init() {
     connection,
     payer,
     payerPair,
+    vaultAuthority,
+    vaultAuthorityPair,
   };
 }
 
@@ -35,6 +38,7 @@ export async function initInitVaultAccounts(
   connection: Connection,
   transactionHandler: PayerTransactionHandler,
   payer: PublicKey,
+  vaultAuthority: PublicKey,
 ): Promise<InitVaultInstructionAccounts & { vaultPair: Keypair }> {
   // -----------------
   // Create External Account
@@ -52,6 +56,7 @@ export async function initInitVaultAccounts(
   const [setupAccountsIxs, setupAccountsSigners, initVaultAccounts] =
     await InitVault.setupInitVaultAccounts(connection, {
       payer,
+      vaultAuthority,
       priceMint,
       externalPriceAccount,
     });
@@ -76,16 +81,23 @@ export async function initInitVaultAccounts(
 }
 
 export async function initVault(t: Test, args: { allowFurtherShareCreation: boolean }) {
-  const { transactionHandler, connection, payer, payerPair } = await init();
-  const initVaultAccounts = await initInitVaultAccounts(t, connection, transactionHandler, payer);
+  const { transactionHandler, connection, payer, payerPair, vaultAuthority, vaultAuthorityPair } =
+    await init();
+  const initVaultAccounts = await initInitVaultAccounts(
+    t,
+    connection,
+    transactionHandler,
+    payer,
+    vaultAuthority,
+  );
   const initVaultIx = await InitVault.initVault(initVaultAccounts, args);
 
-  const initVaulTx = new Transaction().add(initVaultIx);
-  await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
+  const initVaultTx = new Transaction().add(initVaultIx);
+  await transactionHandler.sendAndConfirmTransaction(initVaultTx, []);
 
   return {
     connection,
     transactionHandler,
-    accounts: { payer, payerPair, ...initVaultAccounts },
+    accounts: { payer, payerPair, vaultAuthorityPair, ...initVaultAccounts },
   };
 }
