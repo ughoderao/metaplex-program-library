@@ -28,11 +28,36 @@ const InitVaultStruct = new beet.BeetArgsStruct<
  * @property [] pricingLookupAddress Pricing Lookup Address
  */
 export type InitVaultInstructionAccounts = {
+  // account owner    : token program
+  // supply           : > 0
+  // mint_authority   : vault PDA
+  // freeze_authority : vault PDA
   fractionMint: web3.PublicKey;
+
+  // account owner   : token program
+  // amount          : > 0
+  // owner           : vault PDA
+  // delegate        : none
+  // close_authority : none
+  // mint            : externalPricingLookup.priceMint
+  // mint            : != fractionMint.key
   redeemTreasury: web3.PublicKey;
+
+  // account owner   : token program
+  // amount          : 0
+  // owner           : vault PDA
+  // delegate        : none
+  // close_authority : none
+  // mint            : fractionMint.key
   fractionTreasury: web3.PublicKey;
+
+  // account owner : vault program
+  // key           : uninitialized
   vault: web3.PublicKey;
+
+  // set as vault.authority
   authority: web3.PublicKey;
+
   pricingLookupAddress: web3.PublicKey;
 };
 
@@ -48,14 +73,8 @@ export function createInitVaultInstruction(
   accounts: InitVaultInstructionAccounts,
   args: InitVaultInstructionArgs,
 ) {
-  const {
-    fractionMint,
-    redeemTreasury,
-    fractionTreasury,
-    vault,
-    authority,
-    pricingLookupAddress,
-  } = accounts;
+  const { fractionMint, redeemTreasury, fractionTreasury, vault, authority, pricingLookupAddress } =
+    accounts;
 
   const [data] = InitVaultStruct.serialize({
     instructionDiscriminator: initVaultInstructionDiscriminator,
