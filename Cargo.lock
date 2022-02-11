@@ -830,25 +830,10 @@ dependencies = [
  "ansi_term",
  "atty",
  "bitflags",
- "strsim 0.8.0",
- "textwrap 0.11.0",
+ "strsim",
+ "textwrap",
  "unicode-width",
  "vec_map",
-]
-
-[[package]]
-name = "clap"
-version = "3.0.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08799f92c961c7a1cf0cc398a9073da99e21ce388b46372c37f3191f2f3eed3e"
-dependencies = [
- "atty",
- "bitflags",
- "indexmap",
- "os_str_bytes",
- "strsim 0.10.0",
- "termcolor",
- "textwrap 0.14.2",
 ]
 
 [[package]]
@@ -1929,7 +1914,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "borsh 0.9.2",
- "clap 3.0.13",
+ "clap",
  "mpl-token-vault 0.1.0",
  "solana-clap-utils",
  "solana-cli-config",
@@ -2051,6 +2036,7 @@ dependencies = [
 name = "mpl-nft-packs"
 version = "0.1.0"
 dependencies = [
+ "arrayref",
  "borsh 0.9.2",
  "mpl-metaplex",
  "mpl-token-metadata",
@@ -2059,7 +2045,6 @@ dependencies = [
  "num-traits",
  "num_enum",
  "rand 0.8.4",
- "randomness-oracle-program",
  "solana-program",
  "solana-program-test",
  "solana-sdk",
@@ -2337,15 +2322,6 @@ dependencies = [
  "pin-project",
  "rand 0.8.4",
  "thiserror",
-]
-
-[[package]]
-name = "os_str_bytes"
-version = "6.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e22443d1643a904602595ba1cd8f7d896afe56d26712531c5ff73a15b2fbf64"
-dependencies = [
- "memchr",
 ]
 
 [[package]]
@@ -2661,15 +2637,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16abd0c1b639e9eb4d7c50c0b8100b0d0f849be2349829c740fe8e6eb4816429"
 dependencies = [
  "rand_core 0.5.1",
-]
-
-[[package]]
-name = "randomness-oracle-program"
-version = "0.1.0"
-source = "git+https://github.com/metaplex/randomness-oracle#df99a38c90abad233412a920397497c34a809ebf"
-dependencies = [
- "borsh 0.9.2",
- "solana-program",
 ]
 
 [[package]]
@@ -3223,7 +3190,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47d9bf06dafcc2d0c269c64ffa18722fb353d5d87c6aa6a3cc60d1a28c2f1ac4"
 dependencies = [
  "chrono",
- "clap 2.34.0",
+ "clap",
  "rpassword",
  "solana-perf",
  "solana-remote-wallet",
@@ -3257,7 +3224,7 @@ dependencies = [
  "base64 0.13.0",
  "bincode",
  "bs58 0.4.0",
- "clap 2.34.0",
+ "clap",
  "indicatif",
  "jsonrpc-core",
  "log",
@@ -3314,7 +3281,7 @@ checksum = "c6ba6b15e420aac59e7c6bd21368a5a69538d16805570decfd322315700e2d90"
 dependencies = [
  "bincode",
  "byteorder",
- "clap 2.34.0",
+ "clap",
  "log",
  "serde",
  "serde_derive",
@@ -3403,7 +3370,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7986e4aca1d1110a84e0e417fc26d433a84e516870818612e24f8dcb8794b56"
 dependencies = [
  "bincode",
- "clap 2.34.0",
+ "clap",
  "log",
  "nix",
  "rand 0.7.3",
@@ -3879,12 +3846,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 
 [[package]]
-name = "strsim"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
-
-[[package]]
 name = "subtle"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4017,12 +3978,6 @@ checksum = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 dependencies = [
  "unicode-width",
 ]
-
-[[package]]
-name = "textwrap"
-version = "0.14.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0066c8d12af8b5acd21e00547c3797fde4e8677254a7ee429176ccebbe93dd80"
 
 [[package]]
 name = "thiserror"
